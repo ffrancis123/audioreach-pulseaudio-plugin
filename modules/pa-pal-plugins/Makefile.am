@@ -46,11 +46,13 @@ module_pal_card_la_list = \
                           ${top_srcdir}/module-pal-card/configs/qcs8300-ridesx-snd-card.conf \
                           ${top_srcdir}/module-pal-card/configs/qcs9100-ridesx-snd-card.conf
 
+if VUI_ENABLED
 modlibexec_LTLIBRARIES += module-pal-voiceui-card.la
 module_pal_voiceui_card_la_SOURCES = ${top_srcdir}/module-pal-voiceui-card/module-pal-voiceui-card.c
 module_pal_voiceui_card_la_CFLAGS = $(AM_CFLAGS) $(DBUS_CFLAGS) $(PAL_CFLAGS) @VUI_INTF_HEADERS_CFLAGS@ -DPA_PACKAGE_VERSION=\""${PKG_VER}"\"
 module_pal_voiceui_card_la_LDFLAGS = $(MODULE_LDFLAGS)
 module_pal_voiceui_card_la_LIBADD = $(MODULE_LIBADD) $(DBUS_LIBS) -lpal
+endif
 
 # install essential xml files under /etc
 root_etcdir      = "/etc"
