@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021, 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
@@ -277,15 +277,15 @@ static void pal_module_get_parameters(DBusConnection *conn, DBusMessage *msg, vo
 		pal_device_mute_t *pdev_mute = NULL;
 		param_payload = (pal_param_payload *)calloc(1, sizeof(pal_param_payload) +
 					sizeof(pal_device_mute_t));
-		status = pal_get_param(PAL_PARAM_ID_DEVICE_MUTE, &param_payload,
-					sizeof(param_payload->payload_size), NULL);
+		status = pal_get_param(PAL_PARAM_ID_DEVICE_MUTE, (void **)&param_payload,
+					(size_t *)&param_payload->payload_size, NULL);
 		if (status) {
 			pa_dbus_send_error(conn, msg, DBUS_ERROR_FAILED, "get_param failed");
 			dbus_error_free(&error);
 			free(param_payload);
 			return;
 		}
-		pdev_mute = (pal_device_mute_t*)param_payload->payload[0];
+		pdev_mute = (pal_device_mute_t*)(uintptr_t)param_payload->payload[0];
 		pa_dbus_send_basic_value_reply(conn, msg, DBUS_TYPE_STRING, &pdev_mute->mute);
 	}
 }
