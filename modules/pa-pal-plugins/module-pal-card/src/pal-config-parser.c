@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
@@ -1350,7 +1350,7 @@ static char *pa_pal_config_get_conf_file_name() {
 
     char **items = NULL;
     char *item = NULL;
-    char *card_string[MAX_BUF_SIZE];
+    char card_string[MAX_BUF_SIZE];
     char *conf_file_name = NULL;
     FILE *pf;
     uint32_t i = 0;

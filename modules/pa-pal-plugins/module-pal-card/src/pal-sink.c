@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
@@ -523,7 +523,7 @@ static int pa_pal_sink_set_port_cb(pa_sink *s, pa_device_port *p) {
     if (PA_SINK_IS_OPENED(s->state)) {
         sdata->pal_sdata->sink_event_id = PA_PAL_DEVICE_SWITCH;
         pa_mutex_lock(sdata->pal_sdata->mutex);
-        ret = pa_pal_set_device(sdata->pal_sdata->stream_handle, &param_device_connection);
+        ret = pa_pal_set_device(sdata->pal_sdata->stream_handle, (pa_pal_card_port_device_data *)&param_device_connection);
         sdata->pal_sdata->sink_event_id = PA_PAL_NO_EVENT;
         pa_mutex_unlock(sdata->pal_sdata->mutex);
         pa_cond_signal(sdata->pal_sdata->cond_ctrl_thread, 0);
@@ -590,7 +590,7 @@ static int pa_pal_sink_io_process_msg(pa_msgobject *o, int code, void *data, int
     return pa_sink_process_msg(o, code, data, offset, chunk);
 }
 
-static int pa_pal_sink_reconfigure_cb(pa_sink *s, pa_sample_spec *spec, bool passthrough) {
+static void pa_pal_sink_reconfigure_cb(pa_sink *s, pa_sample_spec *spec, bool passthrough) {
     pa_pal_sink_data *sdata = NULL;
     pa_sink_data *pa_sdata = NULL;
     pal_sink_data *pal_sdata = NULL;
@@ -632,7 +632,7 @@ static int pa_pal_sink_reconfigure_cb(pa_sink *s, pa_sample_spec *spec, bool pas
 
     if (!supported) {
         pa_log_info("Sink does not support sample rate of %d Hz", spec->rate);
-        return -1;
+        return;
     }
 
     if (!PA_SINK_IS_OPENED(s->state)) {
@@ -672,7 +672,7 @@ static int pa_pal_sink_reconfigure_cb(pa_sink *s, pa_sample_spec *spec, bool pas
         if (PA_UNLIKELY(rc)) {
             pa_sdata->sink->sample_spec.rate = old_rate; /* restore old rate if failed */
             pa_log_error("Could create reopen pal sink, error %d", rc);
-            return -1;
+            return;
         }
 
         pa_sdata->sink->sample_spec = tmp_spec;
@@ -682,7 +682,7 @@ static int pa_pal_sink_reconfigure_cb(pa_sink *s, pa_sample_spec *spec, bool pas
         pa_sink_set_fixed_latency(pa_sdata->sink, pal_sdata->sink_latency_us);
     }
 
-    return rc;
+    return;
 }
 
 static pa_idxset* pa_pal_sink_get_formats(pa_sink *s) {
@@ -1226,7 +1226,7 @@ static int open_pal_sink(pa_pal_sink_data *sdata) {
                  pal_sdata->stream_attributes->out_media_config.sample_rate,
                  pal_sdata->stream_attributes->out_media_config.ch_info.channels);
 
-    rc = pal_stream_open(pal_sdata->stream_attributes, 1, pal_sdata->pal_device, 0, NULL, pa_pal_out_cb, sdata,
+    rc = pal_stream_open(pal_sdata->stream_attributes, 1, pal_sdata->pal_device, 0, NULL, pa_pal_out_cb, (uint64_t)sdata,
                              &pal_sdata->stream_handle);
 
     if (rc) {

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
@@ -91,6 +92,7 @@ static void stop_buffering(DBusConnection *conn, DBusMessage *msg, void *userdat
 static void request_read_buffer(DBusConnection *conn, DBusMessage *msg, void *userdata);
 static void get_param_data(DBusConnection *conn, DBusMessage *msg, void *userdata);
 static void get_interface_version(DBusConnection *conn, DBusMessage *msg, void *userdata);
+void pa__done(pa_module *m);
 
 enum module_handler_index {
     MODULE_HANDLER_LOAD_SOUND_MODEL,

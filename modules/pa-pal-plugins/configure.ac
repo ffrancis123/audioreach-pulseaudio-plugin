@@ -68,8 +68,17 @@ AC_ARG_WITH([pa-compress-audio-support], AC_HELP_STRING([--without-pa-compress-a
 AM_CONDITIONAL(COMPRESS_AUDIO_NOT_SUPPORTED, test "x${with_pa_compress_audio_support}" = "xno")
 AC_SUBST(COMPRESS_AUDIO_NOT_SUPPORTED)
 
-PKG_CHECK_MODULES([VUI_INTF_HEADERS],[vui-intf-header])
-AC_SUBST([VUI_INTF_HEADERS_CFLAGS])
+AC_ARG_WITH([vui],
+    AS_HELP_STRING([compile vui (default is no)]),
+    [with_vui=$withval],
+    [with_vui=no])
+
+if (test "x${with_vui}" = "xyes"); then
+    PKG_CHECK_MODULES([VUI_INTF_HEADERS],[vui-intf-header])
+    AC_SUBST([VUI_INTF_HEADERS_CFLAGS])
+fi
+
+AM_CONDITIONAL([VUI_ENABLED], [test "x${with_VUI}" = "xyes"])
 
 AC_ARG_WITH(
         [module-dir],

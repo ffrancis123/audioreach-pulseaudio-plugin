@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
@@ -104,6 +104,9 @@ static int pa_pal_card_add_source(pa_module *module, pa_card *card, const char *
                                   pa_pal_source_handle_t **source_handle);
 static int pa_pal_card_add_sink(pa_module *module, pa_card *card, const char *driver, char *module_name, pa_pal_sink_config *sink,
                                 pa_pal_sink_handle_t **sink_handle);
+void pa__done(pa_module *m);
+int pa_pal_module_extn_init(pa_core *core, pa_card *card);
+void pa_pal_module_extn_deinit(void);
 
 static void pa_pal_card_profiles_free(struct userdata *u, pa_hashmap *profiles) {
     pa_card_profile *p;

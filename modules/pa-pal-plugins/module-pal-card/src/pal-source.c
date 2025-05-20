@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
@@ -435,7 +435,7 @@ static int pa_pal_source_set_port_cb(pa_source *s, pa_device_port *p) {
 
     sdata->pal_sdata->source_event_id = PA_PAL_DEVICE_SWITCH;
     pa_mutex_lock(sdata->pal_sdata->mutex);
-    ret = pa_pal_set_device(sdata->pal_sdata->stream_handle, &param_device_connection);
+    ret = pa_pal_set_device(sdata->pal_sdata->stream_handle, (pa_pal_card_port_device_data *)&param_device_connection);
     sdata->pal_sdata->source_event_id = PA_PAL_NO_EVENT;
     pa_mutex_unlock(sdata->pal_sdata->mutex);
     pa_cond_signal(sdata->pal_sdata->cond_ctrl_thread, 0);
@@ -496,7 +496,7 @@ static int pa_pal_source_process_msg(pa_msgobject *o, int code, void *data, int6
     return pa_source_process_msg(o, code, data, offset, chunk);
 }
 
-static int pa_pal_source_reconfigure_cb(pa_source *s, pa_sample_spec *spec, pa_channel_map *map, bool passthrough) {
+static void pa_pal_source_reconfigure_cb(pa_source *s, pa_sample_spec *spec, bool passthrough) {
     pa_pal_source_data *sdata = NULL;
     pa_source_data *pa_sdata = NULL;
     pal_source_data *pal_sdata = NULL;
@@ -537,12 +537,12 @@ static int pa_pal_source_reconfigure_cb(pa_source *s, pa_sample_spec *spec, pa_c
 
     if (!supported) {
         pa_log_info("Source does not support sample rate of %d Hz", spec->rate);
-        return -1;
+        return;
     }
 
     if (!supported_format) {
         pa_log_info("Source does not support sample format of %d ", spec->format);
-        return -1;
+        return;
     }
 
     if (!PA_SOURCE_IS_OPENED(s->state)) {
@@ -578,7 +578,7 @@ static int pa_pal_source_reconfigure_cb(pa_source *s, pa_sample_spec *spec, pa_c
         if (PA_UNLIKELY(rc)) {
             pa_sdata->source->sample_spec.rate = old_rate; /*restore old rate if failed*/
             pa_log_error("Could create reopen pal source, error %d", rc);
-            return -1;
+            return;
         }
 
         pa_sdata->source->sample_spec = tmp_spec;
@@ -587,7 +587,7 @@ static int pa_pal_source_reconfigure_cb(pa_source *s, pa_sample_spec *spec, pa_c
         pa_source_set_fixed_latency(pa_sdata->source, pa_bytes_to_usec(pal_sdata->buffer_size, &s->sample_spec));
     }
 
-    return rc;
+    return;
 }
 
 static pa_idxset* pa_pal_source_get_formats(pa_source *s) {
@@ -797,7 +797,7 @@ static int restart_pal_source(pa_pal_source_data *sdata, pa_encoding_t encoding,
     pa_sdata = sdata->pa_sdata;
     pal_sdata = sdata->pal_sdata;
     if (!pal_sdata->standby) {
-        rc = close_pal_source(sdata->pal_sdata);
+        rc = close_pal_source((pa_pal_source_data *)sdata->pal_sdata);
         if (rc) {
             pa_log_error("close_pal_source failed, error %d", rc);
             goto exit;
@@ -851,7 +851,7 @@ static int free_pal_source(pal_source_data *pal_sdata) {
     int rc = 0;
 
     if (!pal_sdata->standby) {
-        rc = close_pal_source(pal_sdata);
+        rc = close_pal_source((pa_pal_source_data *)pal_sdata);
         if (rc) {
             pa_log_error("close_pal_source failed, error %d", rc);
         }
