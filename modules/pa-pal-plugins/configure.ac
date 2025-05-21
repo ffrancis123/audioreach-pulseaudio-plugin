@@ -82,8 +82,8 @@ AM_CONDITIONAL([VUI_ENABLED], [test "x${with_VUI}" = "xyes"])
 
 AC_ARG_WITH(
         [module-dir],
-        AS_HELP_STRING([--with-module-dir],[Directory where to install the modules to (defaults to ${libdir}/pulse-${PKG_VER}/modules]),
-        [modlibexecdir=$withval], [modlibexecdir="${libdir}/pulse-${PKG_VER}/modules"])
+        AS_HELP_STRING([--with-module-dir],[Directory where to install the modules to (defaults to ${libdir}/pulseaudio/modules]),
+        [modlibexecdir=$withval], [modlibexecdir="${libdir}/pulseaudio/modules"])
 AC_SUBST(modlibexecdir)
 
 AC_CONFIG_FILES([ \
