@@ -22,8 +22,18 @@ runs:
 
         # Build inside a docker container
         source ./install/environment-setup-armv8-2a-poky-linux
-        cd modules/pa-pal-plugins/
+
+        #install libatomic tools
+        git clone https://github.com/ivmai/libatomic_ops.git
+        cd libatomic_ops
+        autoreconf -Wcross --verbose --install --force --exclude=autopoint
+        autoconf --force
+        ./configure ${{ env.BUILD_ARGS }}
+        make DESTDIR=$SDKTARGETSYSROOT  install
         cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
+        cd ..
+        
+        cd modules/pa-pal-plugins/
         autoreconf -Wcross --verbose --install --force --exclude=autopoint
         autoconf --force
 
