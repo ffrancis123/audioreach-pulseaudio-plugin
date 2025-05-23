@@ -37,7 +37,7 @@ runs:
         autoreconf -Wcross --verbose --install --force --exclude=autopoint
         autoconf --force
 
-        ./configure ${{ env.BUILD_ARGS }}
+        ./configure ${{ env.BUILD_ARGS }} --with-pa_version=17.0 --without-pa-support-card-status
         # make
         make DESTDIR=${{ github.workspace }}/build install
 
