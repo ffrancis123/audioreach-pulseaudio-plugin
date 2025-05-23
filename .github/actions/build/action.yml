@@ -23,6 +23,7 @@ runs:
         # Build inside a docker container
         source ./install/environment-setup-armv8-2a-poky-linux
         cd modules/pa-pal-plugins/
+        cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
         autoreconf -Wcross --verbose --install --force --exclude=autopoint
         autoconf --force
 
