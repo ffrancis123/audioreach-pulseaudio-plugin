@@ -10,32 +10,33 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Clone meta-ar
-      shell: bash
-      run: |
-        # Clone the meta-ar repository
-        cd ${{ github.workspace }}/..
-        # Check if the directory already exists
-        if [ -d "meta-ar" ]; then
-          echo "Directory meta-ar already exists. Pulling latest changes."
-          cd meta-ar
-          git reset --hard origin/main
-          git pull origin main
-        else
-          echo "Directory meta-ar does not exist. Cloning repository."
-          git clone git@github.com:Audioreach/meta-ar.git
-        fi
-
     - name: Build Project
       id: build
       shell: bash
       run: |
         # Load the build arguments
         set +x
+        # Build inside a docker container
+        source ./install/environment-setup-armv8-2a-poky-linux
 
-        # Apply patch
-        git apply ../meta-ar/recipes/audio/audioreach-graphservices/0001-ar_osal-update-msm_audio.h-header-include-path.patch
+        #install libatomic tools
+        git clone https://github.com/ivmai/libatomic_ops.git
+        cd libatomic_ops
+        autoreconf -Wcross --verbose --install --force --exclude=autopoint
+        autoconf --force
+        ./configure ${{ env.BUILD_ARGS }}
+        make DESTDIR=$SDKTARGETSYSROOT  install
+        cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
+        cd ..
+        
+        cd modules/pa-pal-plugins/
+        autoreconf -Wcross --verbose --install --force --exclude=autopoint
+        autoconf --force
 
+        ./configure ${{ env.BUILD_ARGS }} --with-pa_version=17.0 --without-pa-support-card-status
+        # make
+        make DESTDIR=${{ github.workspace }}/build install
+        
         # Build inside a docker container
         docker run \
           --rm \
