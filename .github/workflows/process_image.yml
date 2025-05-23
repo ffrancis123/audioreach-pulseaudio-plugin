@@ -91,6 +91,8 @@ jobs:
               # Copy the arg build files to the mounted image
               cd ..
               #cp -R build/usr/lib* /tmp/rootfs/usr/lib/
+              cp -r ${{ github.workspace }}/build/usr/* /tmp/rootfs/usr/
+              cp -r ${{ github.workspace }}/build/etc/* /tmp/rootfs/etc
               echo "Build files copied successfully"
               sync
               # Unmount the image
