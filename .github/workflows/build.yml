@@ -26,6 +26,13 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
+      - name: Pull Docker Image
+        id: pull_docker_image
+        uses: ./.github/actions/pull_docker_image
+        with:
+          image_name: ar-image:latest
+          github_token: ${{ secrets.hasiburr_qti }}
+
       - name: Pull SDK sh file
         id: pull_sdk
         uses: ./.github/actions/aws-s3-exchanger
@@ -47,18 +54,11 @@ jobs:
           echo "./install" | ./${{ env.SDK_NAME }}
           echo "SDK Script ran successfully"
 
-      - name: Get UID and GID
-        id: ids
-        run: |
-          echo "uid=$(id -u)" >> $GITHUB_OUTPUT
-          echo "gid=$(id -g)" >> $GITHUB_OUTPUT
-
       - name: Build
         id: build
         uses: ./.github/actions/build
         with:
-          uid: ${{ steps.ids.outputs.uid }}
-          gid: ${{ steps.ids.outputs.gid }}
+          docker_image: ar-image:latest
         env:
           BUILD_ARGS: ${{ inputs.build_args }}
 

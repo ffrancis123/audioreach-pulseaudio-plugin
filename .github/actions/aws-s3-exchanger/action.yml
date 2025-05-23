@@ -29,11 +29,6 @@ inputs:
     required: true
     default: upload
 
-outputs:
-  presigned_url:
-    description: Pre-signed URL for the uploaded file
-    value: ${{ steps.sync-data.outputs.presigned_url }}
-
 runs:
   using: "composite"
   steps:
@@ -44,27 +39,34 @@ runs:
         aws configure set aws_secret_access_key ${{ inputs.aws_secret_access_key }}
 
     - name: Sync Data
-      id: sync-data
+      id: sync_data
       shell: bash
       env:
         AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
         UPLOAD_LOCATION: ${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.workflow }}/${{ github.head_ref != '' && github.head_ref || github.run_id }}/
       run: |
-        echo "::group::$(printf '__________ %-100s' 'Process' | tr ' ' _)"
         case "${{ inputs.mode }}" in
           upload)
+            echo "::group::$(printf '__________ %-100s' 'Process' | tr ' ' _)"
             echo "Uploading file to S3 bucket..."
             aws s3 cp "${{ inputs.local_file }}" s3://${{ inputs.s3_bucket }}/${{ inputs.location }}/${{ env.UPLOAD_LOCATION }}
             echo "Uploaded ${{ inputs.local_file }} to s3://${{ inputs.s3_bucket }}/${{ inputs.location }}/${{ env.UPLOAD_LOCATION }}"
+            echo "::endgroup::"
             echo "Creating Pre-signed URL for ${{ inputs.local_file }}..."
-            presigned_url=$(aws s3 presign s3://${{ inputs.s3_bucket }}/${{ env.UPLOAD_LOCATION }}${{ inputs.local_file }} --expires-in 3600)
-            echo "presigned_url=${presigned_url}" >> "$GITHUB_OUTPUT"
+            filename="$(basename "${{ inputs.local_file }}")"
+            echo "Filename: $filename"
+            presigned_url="$(aws s3 presign s3://${{ inputs.s3_bucket }}/${{ inputs.location }}/${{ env.UPLOAD_LOCATION }}$filename --expires-in 3600)"
+            echo "Pre-signed URL: $presigned_url"
+            # write the url in a text file
+            echo ${presigned_url} > ${{ github.workspace }}/presigned_url.txt
             ;;
           download)
             #Download The required file from s3
+            echo "::group::$(printf '__________ %-100s' 'Process' | tr ' ' _)"
             echo "Downloading files from S3 bucket..."
             aws s3 cp s3://${{ inputs.s3_bucket }}/${{ inputs.location }}/${{ inputs.download_filename }} .
+            echo "::endgroup::"
             chmod 777 ${{ inputs.download_filename }}
             echo "Downloaded ${{ inputs.download_filename }} from s3://${{ inputs.s3_bucket }}/${{ inputs.location }}"
             ;;
@@ -73,4 +75,12 @@ runs:
             exit 1
             ;;
         esac
-        echo "::endgroup::"
+
+    - name: Upload Pre-signed URL
+      id: upload_presigned_url
+      if: ${{ inputs.mode == 'upload' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: presigned_url.txt
+        path: ${{ github.workspace }}/presigned_url.txt
+        retention-days: 1

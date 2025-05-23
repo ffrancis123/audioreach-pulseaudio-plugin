@@ -22,7 +22,14 @@ jobs:
     with:
       build_args: ${{ needs.load_parameters.outputs.build_args }}
 
-  test:
+  process_image:
     needs: [ load_parameters, build ]
+    uses: ./.github/workflows/process_image.yml
+    secrets: inherit
+    with:
+      docker_image: ar-image:latest
+
+  trigger_lava:
+    needs: [ load_parameters, build, process_image ]
     uses: ./.github/workflows/test.yml
     secrets: inherit

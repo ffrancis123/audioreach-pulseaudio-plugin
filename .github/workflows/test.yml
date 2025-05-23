@@ -1,105 +1,36 @@
----
 name: _test
-description: Run tests on the build
+description: Trigger LAVA tests on the build
 
 on:
   workflow_call:
 
-env:
-  IMAGE_NAME: core-image-base-qcs6490-rb3gen2-core-kit.rootfs-20250514094843.qcomflash
-
 jobs:
-  process_image:
-    runs-on: self-hosted
+  process_url:
     outputs:
-      presigned_url: ${{ steps.upload_tar_image.outputs.presigned_url }}
+      build_url: ${{ steps.get_build_url.outputs.result }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-
-      - name: Download build artifact
-        id: download_build_artifact
+      - name: Download presigned URL
+        id: download_url
         uses: actions/download-artifact@v4
         with:
-          name: build.tar
+          name: presigned_url.txt
           path: ${{ github.workspace }}
 
-      - name: Extract build artifact
-        id: extract_build_artifact
-        shell: bash
-        run: |
-          #!/bin/bash
-          set -e
-
-          mkdir -p ${{ github.workspace }}/build
-          echo "Extracting the build artifact"
-          tar -xvf ${{ github.workspace }}/build.tar -C ${{ github.workspace }}/build
-          echo "Build artifact extracted successfully"
-
-      - name: Pull meta-ar pre compiled image
-        id: pull_meta_ar
-        uses: ./.github/actions/aws-s3-exchanger
+      - name: Get build URL
+        id: get_build_url
+        uses: actions/github-script@v7
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          s3_bucket: qli-stg-kernel-gh-artifacts
-          mode: download
-          download_filename: ${{ env.IMAGE_NAME }}.tar.gz
-          location: meta-ar-test
-
-      - name: Extract image and mount
-        id: extract_image
-        shell: bash
-        run: |
-          #!/bin/bash
-          set -e
-
-          echo "Extracting the image"
-          tar -xvf ${{ env.IMAGE_NAME }}.tar.gz
-          echo "Image extracted successfully"
-          cd ${{ env.IMAGE_NAME }}
-          mkdir -p /tmp/rootfs
-          fuse-ext2 rootfs.img /tmp/rootfs -o rw+
-          echo "Image mounted successfully"
-
-          # Copy the arg build files to the mounted image
-          cp -r ${{ github.workspace }}/build/usr/* /tmp/rootfs/usr/
-          cp -r ${{ github.workspace }}/build/etc/* /tmp/rootfs/etc
-
-          echo "Build files copied successfully"
-
-          # Unmount the image
-          fusermount -u /tmp/rootfs
-          echo "Image unmounted successfully"
-
-      - name: Create tar image for qcomflash directory
-        id: create_tar_image
-        shell: bash
-        run: |
-          #!/bin/bash
-          set -e
-
-          echo "Creating tar image for qcomflash directory"
-          tar -cvf core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash.tar.gz ${{ env.IMAGE_NAME }}/
-          echo "Tar image created successfully"
-
-      - name: Upload tar image
-        id: upload_tar_image
-        uses: ./.github/actions/aws-s3-exchanger
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          s3_bucket: qli-stg-kernel-gh-artifacts
-          local_file: core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash.tar.gz
-          location: meta-ar-test/test
-          mode: upload
+          script: |
+            const fs = require('fs')
+            const filePath = `${{ github.workspace }}/presigned_url.txt`
+            const url = fs.readFileSync(filePath, 'utf8').toString().trim()
+            console.log(url)
+            return url
 
   prepare-job-list:
-    needs: process_image
     runs-on: ubuntu-latest
+    needs: process_url
     outputs:
       jobmatrix: ${{ steps.listjobs.outputs.jobmatrix }}
     steps:
@@ -108,12 +39,14 @@ jobs:
         with:
           fetch-depth: 0
           repository: Audioreach/meta-ar-test
-          token: ${{ secrets.QTI_FF }}
+          token: ${{ secrets.PAT }}
           
       - name: Print trigger
         run: |
           echo "Triggered by ${{ github.event_name }}"
-          echo "Build URL: ${{ needs.process_image.outputs.presigned_url }}"
+          echo "Build URL: ${{ needs.process_url.outputs.build_url }}"
+          echo "${{ needs.process_url.outputs.build_url }}"
+
       - name: "List jobs"
         id: listjobs
         run: |
@@ -125,7 +58,7 @@ jobs:
           echo "Preparing testjob files"
 
   submit-job:
-    needs: [ process_image, prepare-job-list ]
+    needs: [process_url, prepare-job-list]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -136,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
           repository: Audioreach/meta-ar-test
-          token: ${{ secrets.QTI_FF }}
+          token: ${{ secrets.PAT }}
 
       - name: "Update test definition ${{ matrix.target }}"
         run: |
@@ -145,7 +78,7 @@ jobs:
           DEVICE_TYPE_PATH="${FIND_PATH%/*}"
           DEVICE_TYPE="${DEVICE_TYPE_PATH#*/}"
           BUILD_FILE_NAME="core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash.tar.gz"
-          BUILD_DOWNLOAD_URL="${{ needs.process_image.outputs.presigned_url }}"
+          BUILD_DOWNLOAD_URL="${{ needs.process_url.outputs.build_url }}"
           sed -i "s|{{DEVICE_TYPE}}|${DEVICE_TYPE}|g" "${{ matrix.target }}"
           sed -i "s|{{GITHUB_SHA}}|${GITHUB_SHA}|g" "${{ matrix.target }}"
           ESCAPED_URL=$(echo "$BUILD_DOWNLOAD_URL" | sed 's/[&/?=]/\\&/g')
@@ -158,7 +91,7 @@ jobs:
         timeout-minutes: 20
         uses: foundriesio/lava-action@v6
         with:
-          lava_token: ${{ secrets.LAVATOKEN }}
+          lava_token: ${{ secrets.LAVA_TOKEN }}
           lava_url: 'lava.infra.foundries.io'
           job_definition: ${{ matrix.target }}
           wait_for_job: true
