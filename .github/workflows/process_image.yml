@@ -90,7 +90,7 @@ jobs:
 
               # Copy the arg build files to the mounted image
               cd ..
-              cp -R build/usr/lib* /tmp/rootfs/usr/lib/
+              #cp -R build/usr/lib* /tmp/rootfs/usr/lib/
               echo "Build files copied successfully"
               sync
               # Unmount the image
