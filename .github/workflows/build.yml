@@ -1,0 +1,72 @@
+---
+name: _build
+description: Reusable workflow for build instructions
+
+on:
+  workflow_call:
+    inputs:
+      build_args:
+        required: true
+        type: string
+        description: Required build arguments
+
+env:
+  SDK_NAME: poky-glibc-x86_64-core-image-base-armv8-2a-qcs6490-rb3gen2-core-kit-toolchain-5.2.sh
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Pull SDK sh file
+        id: pull_sdk
+        uses: ./.github/actions/aws-s3-exchanger
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          s3_bucket: qli-stg-kernel-gh-artifacts
+          download_filename: ${{ env.SDK_NAME }}
+          mode: download
+
+      - name: Setup Directory Structure
+        run: mkdir -p install/tmp
+
+      - name: Run SDK Script
+        id: run_sdk
+        shell: bash
+        run: |
+          echo "Running SDK Script"
+          echo "./install" | ./${{ env.SDK_NAME }}
+          echo "SDK Script ran successfully"
+
+      - name: Get UID and GID
+        id: ids
+        run: |
+          echo "uid=$(id -u)" >> $GITHUB_OUTPUT
+          echo "gid=$(id -g)" >> $GITHUB_OUTPUT
+
+      - name: Build
+        id: build
+        uses: ./.github/actions/build
+        with:
+          uid: ${{ steps.ids.outputs.uid }}
+          gid: ${{ steps.ids.outputs.gid }}
+        env:
+          BUILD_ARGS: ${{ inputs.build_args }}
+
+      - name: Clean Up Workspace
+        if: always() 
+        shell: bash
+        run: |
+          echo "Cleaning Up Workspace"
+          rm -rf install/ ${{ env.SDK_NAME }}
+          rm -rf build/ ${{ github.workspace }}/build.tar
+          echo "Workspace cleaned up successfully"

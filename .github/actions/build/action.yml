@@ -1,0 +1,46 @@
+---
+name: build
+description: Build Action
+
+inputs:
+  uid:
+    required: true
+    description: Docker User ID
+  gid:
+    required: true
+    description: Docker Group ID
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build Project
+      id: build
+      shell: bash
+      run: |
+        # Load the build arguments
+        set +x
+
+        # Build inside a docker container
+        source ./install/environment-setup-armv8-2a-poky-linux
+        autoreconf -Wcross --verbose --install --force --exclude=autopoint
+        autoconf --force
+
+        ./configure ${{ env.BUILD_ARGS }}
+        # make
+        make DESTDIR=${{ github.workspace }}/build install
+
+    - name: Create build.tar 
+      id: create_build_tar
+      shell: bash
+      run: |
+        # Create a tarball of the build directory
+        tar -czf build.tar -C ${{ github.workspace }}/build .
+        echo "Build tar created at ${{ github.workspace }}/build.tar"
+
+    - name: Upload build.tar
+      id: upload_build_tar
+      uses: actions/upload-artifact@v4
+      with:
+        name: build.tar
+        path: ${{ github.workspace }}/build.tar
+        retention-days: 1
