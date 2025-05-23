@@ -16,6 +16,4 @@
 --mandir=/usr/share/man
 --disable-silent-rules
 --disable-dependency-tracking
---with-pa_version=17.0
---without-pa-support-card-status
 --disable-static
