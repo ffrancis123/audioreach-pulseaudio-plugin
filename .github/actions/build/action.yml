@@ -35,12 +35,12 @@ runs:
         source ./install/environment-setup-armv8-2a-poky-linux
 
         #install pal-headers
-        cd audioreach-pal/inc
+        cd ../audioreach-pal/inc
         autoreconf -Wcross --verbose --install --force --exclude=autopoint
         autoconf --force
         ./configure ${{ env.BUILD_ARGS }}
         make DESTDIR=$SDKTARGETSYSROOT  install
-        cd ../../
+        cd ../../../
 
         #install libatomic tools
         git clone https://github.com/ivmai/libatomic_ops.git
