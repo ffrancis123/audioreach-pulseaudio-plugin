@@ -19,6 +19,15 @@ runs:
         # Build inside a docker container
         source ./install/environment-setup-armv8-2a-poky-linux
 
+        #install pal-headers
+        cd inc
+        autoreconf -Wcross --verbose --install --force --exclude=autopoint
+        autoconf --force
+        ./configure ${{ env.BUILD_ARGS }}
+        make DESTDIR=$SDKTARGETSYSROOT  install
+        #cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
+        cd ..
+
         #install libatomic tools
         git clone https://github.com/ivmai/libatomic_ops.git
         cd libatomic_ops
