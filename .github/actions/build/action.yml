@@ -46,10 +46,6 @@ runs:
       run: |
         # Load the build arguments
         set +x
-        # Build inside a docker container
-        #source ../../install/environment-setup-armv8-2a-poky-linux
-
-       
 
         #./configure ${{ env.BUILD_ARGS }} --with-pa_version=17.0 --without-pa-support-card-status
         # make
@@ -68,22 +64,21 @@ runs:
           bash -c "
             source ./install/environment-setup-armv8-2a-poky-linux
 
-
             #install pal-headers
-            cd audioreach-pal/inc
+            cd ../audioreach-pal/inc
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=$SDKTARGETSYSROOT  install
-            cd ../../
+            cd -
   
-            cd libatomic_ops
+            cd ../libatomic_ops
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=$SDKTARGETSYSROOT  install
             cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
-            cd ..
+            cd -
         
             cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
