@@ -65,21 +65,23 @@ runs:
             source ./install/environment-setup-armv8-2a-poky-linux
 
             #install pal-headers
-            cd ${{ github.workspace }}/../audioreach-pal/inc
+            git clone https://github.com/Audioreach/audioreach-pal.git
+            cd audioreach-pal/inc
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=$SDKTARGETSYSROOT  install
             cd -
 
-            ls ${{ github.workspace }}/..
-            cd ${{ github.workspace }}/../libatomic_ops
+            git clone https://github.com/ivmai/libatomic_ops.git
+            ls
+            cd libatomic_ops
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=$SDKTARGETSYSROOT  install
             cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
-            cd ${{ github.workspace }}
+            cd -
         
             cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
