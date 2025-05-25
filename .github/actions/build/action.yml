@@ -64,6 +64,31 @@ runs:
           bash -c "
             source ./install/environment-setup-armv8-2a-poky-linux
 
+            # Clone the libatomic_ops repository
+            cd ${{ github.workspace }}/..
+            # Check if the directory already exists
+            if [ -d "libatomic_ops" ]; then
+              echo "Directory audioreach-pal already exists. Pulling latest changes."
+              cd libatomic_ops
+              git reset --hard origin/master
+              git pull origin master
+            else
+              echo "Directory audioreach-libatomic does not exist. Cloning repository."
+              git clone https://github.com/ivmai/libatomic_ops.git
+            fi
+
+            # Clone the libatomic_ops repository
+            cd ${{ github.workspace }}/..
+            # Check if the directory already exists
+            if [ -d "libatomic_ops" ]; then
+              echo "Directory audioreach-pal already exists. Pulling latest changes."
+              cd libatomic_ops
+              git reset --hard origin/master
+              git pull origin master
+            else
+              echo "Directory audioreach-libatomic does not exist. Cloning repository."
+              git clone https://github.com/ivmai/libatomic_ops.git
+            fi
             #install pal-headers
             pwd
             ls .
