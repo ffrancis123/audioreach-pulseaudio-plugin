@@ -19,7 +19,7 @@ runs:
         if [ -d "audioreach-pal" ]; then
           echo "Directory audioreach-pal already exists. Pulling latest changes."
           cd audioreach-pal
-          git reset --hard origin/main
+          git reset --hard origin/qclinux1.o
           git pull origin main
         else
           echo "Directory audioreach-pal does not exist. Cloning repository."
