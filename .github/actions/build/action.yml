@@ -68,14 +68,17 @@ runs:
             pwd
             ls .
             ls ..
-            cd ../audioreach-pal/inc
+            cd ${{ github.workspace }}/audioreach-pal/inc
+            pwd
+            ls
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=$SDKTARGETSYSROOT  install
             cd -
-  
-            cd ../libatomic_ops
+
+            ls ${{ github.workspace }}
+            cd ${{ github.workspace }}/libatomic_ops
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
