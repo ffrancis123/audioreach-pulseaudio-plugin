@@ -64,11 +64,23 @@ runs:
           bash -c "
             source ./install/environment-setup-armv8-2a-poky-linux
 
+            # Clone the audioreach-pal repository
+            cd ${{ github.workspace }}/..
+            # Check if the directory already exists
+            if [ -d "audioreach-pal" ]; then
+              echo "Directory audioreach-pal already exists. Pulling latest changes."
+              cd audioreach-pal
+              git reset --hard origin/qclinux1.0
+              git pull origin qclinux1.0
+            else
+              echo "Directory audioreach-pal does not exist. Cloning repository."
+              git clone https://github.com/Audioreach/audioreach-pal.git
+            fi
             #install pal-headers
             pwd
             ls .
             ls ..
-            cd ${{ github.workspace }}/audioreach-pal/inc
+            cd ${{ github.workspace }}/../audioreach-pal/inc
             pwd
             ls
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
@@ -78,13 +90,25 @@ runs:
             cd -
 
             ls ${{ github.workspace }}
-            cd ${{ github.workspace }}/libatomic_ops
+            # Clone the libatomic_ops repository
+            cd ${{ github.workspace }}/..
+            # Check if the directory already exists
+            if [ -d "libatomic_ops" ]; then
+              echo "Directory audioreach-pal already exists. Pulling latest changes."
+              cd libatomic_ops
+              git reset --hard origin/master
+              git pull origin master
+            else
+              echo "Directory audioreach-libatomic does not exist. Cloning repository."
+              git clone https://github.com/ivmai/libatomic_ops.git
+            fi
+            cd ${{ github.workspace }}/../libatomic_ops
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=$SDKTARGETSYSROOT  install
             cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
-            cd -
+            cd ${{ github.workspace }}
         
             cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
