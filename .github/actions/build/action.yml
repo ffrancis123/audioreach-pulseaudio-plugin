@@ -47,7 +47,7 @@ runs:
         # Load the build arguments
         set +x
         # Build inside a docker container
-        source ./install/environment-setup-armv8-2a-poky-linux
+        source ../../install/environment-setup-armv8-2a-poky-linux
 
         #install pal-headers
         cd ../audioreach-pal/inc
