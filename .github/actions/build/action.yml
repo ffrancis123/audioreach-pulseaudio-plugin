@@ -45,7 +45,7 @@ runs:
       shell: bash
       run: |
         # Load the build arguments
-        set +x
+        #set +x
         # Build inside a docker container
         #source ../../install/environment-setup-armv8-2a-poky-linux
 
@@ -70,9 +70,10 @@ runs:
 
 
             #install pal-headers
-            pwd
-            ls
+            
+            echo "This is reached Pal headers"
             cd audioreach-pal/inc
+            pwd
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
@@ -80,8 +81,8 @@ runs:
             cd ../../
   
             cd libatomic_ops
+            echo "This is reached libatomic_ops"
             pwd
-            ls
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
@@ -90,8 +91,8 @@ runs:
             cd ..
         
             cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
+            echo "This is reached pa-pal-plugins"
             pwd
-            ls
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             # Run the configure script with the specified arguments
