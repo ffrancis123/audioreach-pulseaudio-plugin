@@ -65,6 +65,9 @@ runs:
             source ./install/environment-setup-armv8-2a-poky-linux
 
             #install pal-headers
+            pwd
+            ls .
+            ls ..
             cd ../audioreach-pal/inc
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
