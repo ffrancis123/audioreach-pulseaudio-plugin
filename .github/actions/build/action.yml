@@ -25,7 +25,7 @@ runs:
           echo "Directory audioreach-pal does not exist. Cloning repository."
           git clone https://github.com/Audioreach/audioreach-pal.git
         fi
-      - name: Clone libatomic
+    - name: Clone libatomic
       shell: bash
       run: |
         # Clone the libatomic_ops repository
