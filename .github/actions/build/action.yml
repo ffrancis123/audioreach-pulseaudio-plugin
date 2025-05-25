@@ -46,6 +46,7 @@ runs:
       run: |
         # Load the build arguments
         set +x
+        echo $SDKTARGETSYSROOT
 
         #./configure ${{ env.BUILD_ARGS }} --with-pa_version=17.0 --without-pa-support-card-status
         # make
@@ -63,6 +64,7 @@ runs:
           ${{ inputs.docker_image }} \
           bash -c "
             source ./install/environment-setup-armv8-2a-poky-linux
+            echo $SDKTARGETSYSROOT
 
             #install pal-headers
             git clone https://github.com/Audioreach/audioreach-pal.git
@@ -70,7 +72,7 @@ runs:
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
-            make DESTDIR=$SDKTARGETSYSROOT  install
+            sudo make DESTDIR=$SDKTARGETSYSROOT  install
             cd -
 
             git clone https://github.com/ivmai/libatomic_ops.git
@@ -79,7 +81,8 @@ runs:
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
-            make DESTDIR=$SDKTARGETSYSROOT  install
+            
+            sudo make DESTDIR=$SDKTARGETSYSROOT  install
             cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
             cd -
         
