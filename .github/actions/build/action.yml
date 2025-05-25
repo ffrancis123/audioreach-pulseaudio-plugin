@@ -40,7 +40,7 @@ runs:
         autoconf --force
         ./configure ${{ env.BUILD_ARGS }}
         make DESTDIR=$SDKTARGETSYSROOT  install
-        cd ../../../
+        cd ../../
 
         #install libatomic tools
         git clone https://github.com/ivmai/libatomic_ops.git
