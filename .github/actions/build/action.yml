@@ -45,7 +45,7 @@ runs:
       shell: bash
       run: |
         # Load the build arguments
-        #set +x
+        set +x
         # Build inside a docker container
         #source ../../install/environment-setup-armv8-2a-poky-linux
 
