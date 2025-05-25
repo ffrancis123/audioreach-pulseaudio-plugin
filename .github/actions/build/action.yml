@@ -47,31 +47,13 @@ runs:
         # Load the build arguments
         set +x
         # Build inside a docker container
-        source ../../install/environment-setup-armv8-2a-poky-linux
+        #source ../../install/environment-setup-armv8-2a-poky-linux
 
-        #install pal-headers
-        cd ../audioreach-pal/inc
-        autoreconf -Wcross --verbose --install --force --exclude=autopoint
-        autoconf --force
-        ./configure ${{ env.BUILD_ARGS }}
-        make DESTDIR=$SDKTARGETSYSROOT  install
-        cd ../../
-  
-        cd libatomic_ops
-        autoreconf -Wcross --verbose --install --force --exclude=autopoint
-        autoconf --force
-        ./configure ${{ env.BUILD_ARGS }}
-        make DESTDIR=$SDKTARGETSYSROOT  install
-        cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
-        cd ..
-        
-        cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
-        autoreconf -Wcross --verbose --install --force --exclude=autopoint
-        autoconf --force
+       
 
-        ./configure ${{ env.BUILD_ARGS }} --with-pa_version=17.0 --without-pa-support-card-status
+        #./configure ${{ env.BUILD_ARGS }} --with-pa_version=17.0 --without-pa-support-card-status
         # make
-        make DESTDIR=${{ github.workspace }}/build install
+        #make DESTDIR=${{ github.workspace }}/build install
         
         # Build inside a docker container
         docker run \
@@ -85,9 +67,27 @@ runs:
           ${{ inputs.docker_image }} \
           bash -c "
             source ./install/environment-setup-armv8-2a-poky-linux
+
+
+            #install pal-headers
+            cd ../audioreach-pal/inc
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
-
+            ./configure ${{ env.BUILD_ARGS }}
+            make DESTDIR=$SDKTARGETSYSROOT  install
+            cd ../../
+  
+            cd libatomic_ops
+            autoreconf -Wcross --verbose --install --force --exclude=autopoint
+            autoconf --force
+            ./configure ${{ env.BUILD_ARGS }}
+            make DESTDIR=$SDKTARGETSYSROOT  install
+            cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
+            cd ..
+        
+            cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
+            autoreconf -Wcross --verbose --install --force --exclude=autopoint
+            autoconf --force
             # Run the configure script with the specified arguments
             ./configure ${BUILD_ARGS} --with-pa_version=17.0 --without-pa-support-card-status
             # make
