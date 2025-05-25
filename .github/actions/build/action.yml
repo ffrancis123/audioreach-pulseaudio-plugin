@@ -52,7 +52,7 @@ runs:
         cp -r $OECORE_NATIVE_SYSROOT/usr/share/libtool/* $SDKTARGETSYSROOT/usr/include/
         cd ..
         
-        cd modules/pa-pal-plugins/
+        cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
         autoreconf -Wcross --verbose --install --force --exclude=autopoint
         autoconf --force
 
