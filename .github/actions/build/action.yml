@@ -64,7 +64,7 @@ runs:
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
-            make DESTDIR=${SDKTARGETSYSROOT}/build  install
+            make DESTDIR=${SDKTARGETSYSROOT}  install
             cd ../../
 
             # libatomic-ops
@@ -72,7 +72,7 @@ runs:
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
-            make DESTDIR=${GITHUB_WORKSPACE}/build install
+            make DESTDIR=${SDKTARGETSYSROOT} install
             cp -r ${GITHUB_WORKSPACE}/build/usr/share/libtool/* ${SDKTARGETSYSROOT}/build/usr/include/
             cd ../
         
