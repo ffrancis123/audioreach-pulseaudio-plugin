@@ -58,8 +58,8 @@ runs:
           --privileged \
           ${{ inputs.docker_image }} \
           bash -c "
-            echo "${GITHUB_WORKSPACE}/install" | ./${{ env.SDK_NAME }}
-            source ${GITHUB_WORKSPACE}/install/environment-setup-armv8-2a-poky-linux
+            echo "audioreach-pulseaudio-plugin/install" | audioreach-pulseaudio-plugin/${{ env.SDK_NAME }}
+            source audioreach-pulseaudio-plugin/install/environment-setup-armv8-2a-poky-linux
             
             #install pal-headers
             cd audioreach-pal/inc
@@ -84,7 +84,7 @@ runs:
             # Run the configure script with the specified arguments
             ./configure ${BUILD_ARGS} --with-pa_version=17.0 --without-pa-support-card-status
             # make
-            make DESTDIR=${GITHUB_WORKSPACE}/build install
+            make DESTDIR=build install
             "
 
     - name: Create build.tar 
