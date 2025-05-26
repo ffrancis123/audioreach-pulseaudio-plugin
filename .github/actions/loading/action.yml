@@ -16,6 +16,6 @@ runs:
       with:
         script: |
           const fs = require('fs')
-          const options = fs.readFileSync('./ci/BUILD_OPTIONS.txt').toString().trim().split('\n').join(' ')
+          const options = fs.readFileSync('./ci/build_options.txt').toString().trim().split('\n').join(' ')
           console.log(options)
           core.setOutput('build_args', options)
