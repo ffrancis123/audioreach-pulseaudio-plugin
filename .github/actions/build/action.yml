@@ -46,7 +46,7 @@ runs:
       run: |
         # Load the build arguments
         set +x
-       
+        cd ..
         # Build inside a docker container
         docker run \
           --rm \
@@ -60,12 +60,11 @@ runs:
           bash -c "
             source ./install/environment-setup-armv8-2a-poky-linux          
             #install pal-headers
-            cd ..
             cd audioreach-pal/inc
             autoreconf -Wcross --verbose --install --force --exclude=autopoint
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
-            make DESTDIR=${GITHUB_WORKSPACE}/build  install
+            make DESTDIR=${SDKTARGETSYSROOT}/build  install
             cd ../../
 
             # libatomic-ops
@@ -74,7 +73,7 @@ runs:
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=${GITHUB_WORKSPACE}/build install
-            cp -r ${GITHUB_WORKSPACE}/build/usr/share/libtool/* ${GITHUB_WORKSPACE}/build/usr/include/
+            cp -r ${GITHUB_WORKSPACE}/build/usr/share/libtool/* ${SDKTARGETSYSROOT}/build/usr/include/
             cd ../
         
             cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
