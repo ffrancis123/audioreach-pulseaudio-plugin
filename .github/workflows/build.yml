@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: |
           echo "Running SDK Script"
-          #echo "./install" | ./${{ env.SDK_NAME }}
+          echo "./install" | ./${{ env.SDK_NAME }}
           echo "SDK Script ran successfully"
 
       - name: Build
