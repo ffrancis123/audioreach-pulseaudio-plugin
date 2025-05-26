@@ -73,7 +73,7 @@ runs:
             autoconf --force
             ./configure ${{ env.BUILD_ARGS }}
             make DESTDIR=${SDKTARGETSYSROOT} install
-            cp -r ${GITHUB_WORKSPACE}/build/usr/share/libtool/* ${SDKTARGETSYSROOT}/build/usr/include/
+            cp -r ${OECORE_NATIVE_SYSROOT}/usr/share/libtool/* ${SDKTARGETSYSROOT}/build/usr/include/
             cd ../
         
             cd audioreach-pulseaudio-plugin/modules/pa-pal-plugins/
