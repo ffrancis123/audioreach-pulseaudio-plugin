@@ -62,7 +62,7 @@ runs:
         autoconf --force
         ./configure ${{ env.BUILD_ARGS }}
         make DESTDIR=${SDKTARGETSYSROOT} install
-        cp -r ${OECORE_NATIVE_SYSROOT}/usr/share/libtool/* ${SDKTARGETSYSROOT}/build/usr/include/
+        cp -r ${OECORE_NATIVE_SYSROOT}/usr/share/libtool/* ${SDKTARGETSYSROOT}/usr/include/
         cd -
         # Build inside a docker container
         docker run \
