@@ -83,7 +83,7 @@ runs:
             # Run the configure script with the specified arguments
             ./configure ${BUILD_ARGS} --with-pa_version=17.0 --without-pa-support-card-status
             # make
-            make DESTDIR=build install
+            make DESTDIR=${GITHUB_WORKSPACE}/build install
             "
 
     - name: Create build.tar 
