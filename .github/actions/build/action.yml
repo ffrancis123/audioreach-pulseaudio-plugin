@@ -58,6 +58,7 @@ runs:
           --privileged \
           ${{ inputs.docker_image }} \
           bash -c "
+            mkdir audioreach-pulseaudio-plugin/install
             echo "audioreach-pulseaudio-plugin/install" | audioreach-pulseaudio-plugin/${{ env.SDK_NAME }}
             source audioreach-pulseaudio-plugin/install/environment-setup-armv8-2a-poky-linux
             
