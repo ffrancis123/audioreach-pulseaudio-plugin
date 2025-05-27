@@ -3,12 +3,6 @@ name: AWS S3 Exchanger
 description: Upload and download files from AWS S3
 
 inputs:
-  aws_access_key_id:
-    description: AWS Access Key ID
-    required: true
-  aws_secret_access_key:
-    description: AWS Secret Access Key
-    required: true
   s3_bucket:
     description: S3 Bucket Name
     required: true
@@ -32,18 +26,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup AWS CLI
-      shell: bash
-      run: |
-        aws configure set aws_access_key_id ${{ inputs.aws_access_key_id }}
-        aws configure set aws_secret_access_key ${{ inputs.aws_secret_access_key }}
 
     - name: Sync Data
       id: sync_data
       shell: bash
       env:
-        AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
         UPLOAD_LOCATION: ${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.workflow }}/${{ github.head_ref != '' && github.head_ref || github.run_id }}/
       run: |
         case "${{ inputs.mode }}" in

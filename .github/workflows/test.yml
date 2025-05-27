@@ -8,7 +8,9 @@ jobs:
   process_url:
     outputs:
       build_url: ${{ steps.get_build_url.outputs.result }}
-    runs-on: ubuntu-latest
+    runs-on:
+      group: GHA-Audioreach-SelfHosted-RG
+      labels: [ self-hosted, audior-prd-u2404-x64-large-od-ephem ]
     steps:
       - name: Download presigned URL
         id: download_url
@@ -29,7 +31,9 @@ jobs:
             return url
 
   prepare-job-list:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: GHA-Audioreach-SelfHosted-RG
+      labels: [ self-hosted, audior-prd-u2404-x64-large-od-ephem ]
     needs: process_url
     outputs:
       jobmatrix: ${{ steps.listjobs.outputs.jobmatrix }}
@@ -39,8 +43,7 @@ jobs:
         with:
           fetch-depth: 0
           repository: Audioreach/meta-ar-test
-          #token: ${{ secrets.PAT }}
-          token: ${{ secrets.QTI_FF }}
+          token: ${{ secrets.PAT }}
           
       - name: Print trigger
         run: |
@@ -60,7 +63,9 @@ jobs:
 
   submit-job:
     needs: [process_url, prepare-job-list]
-    runs-on: ubuntu-latest
+    runs-on:
+      group: GHA-Audioreach-SelfHosted-RG
+      labels: [ self-hosted, audior-prd-u2404-x64-large-od-ephem ]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare-job-list.outputs.jobmatrix) }}
@@ -70,8 +75,7 @@ jobs:
         with:
           fetch-depth: 0
           repository: Audioreach/meta-ar-test
-          #token: ${{ secrets.PAT }}
-          token: ${{ secrets.QTI_FF }}
+          token: ${{ secrets.PAT }}
 
       - name: "Update test definition ${{ matrix.target }}"
         run: |

@@ -15,7 +15,9 @@ env:
 
 jobs:
   process_image:
-    runs-on: self-hosted
+    runs-on:
+      group: GHA-Audioreach-SelfHosted-RG
+      labels: [ self-hosted, audior-prd-u2404-x64-large-od-ephem ]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,12 +25,9 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - name: Pull Docker Image
-        id: pull_image
-        uses: ./.github/actions/pull_docker_image
-        with:
-          image_name: ${{ inputs.docker_image }}
-          github_token: ${{ secrets.hasiburr_qti }}
+      - name: Build docker Image
+        id: get-docker-image
+        uses: ./.github/actions/build_docker_image
 
       - name: Download build artifact
         id: download_build_artifact
@@ -53,12 +52,10 @@ jobs:
         id: pull_meta_ar
         uses: ./.github/actions/aws-s3-exchanger
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          s3_bucket: qli-stg-kernel-gh-artifacts
+          s3_bucket: qli-prd-audior-gh-artifacts
           mode: download
           download_filename: ${{ env.IMAGE_NAME }}.tar.gz
-          location: meta-ar-test
+          location: Audioreach/meta-ar
 
       - name: Extract image and mount
         id: extract_image
@@ -116,9 +113,7 @@ jobs:
         id: upload_tar_image
         uses: ./.github/actions/aws-s3-exchanger
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          s3_bucket: qli-stg-kernel-gh-artifacts
+          s3_bucket: qli-prd-audior-gh-artifacts
           local_file: ${{ github.workspace }}/core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash.tar.gz
-          location: meta-ar-test/test
+          location: Audioreach/args
           mode: upload

@@ -16,7 +16,9 @@ env:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on:
+      group: GHA-Audioreach-SelfHosted-RG
+      labels: [ self-hosted, audior-prd-u2404-x64-large-od-ephem ]
     strategy:
       fail-fast: false
     steps:
@@ -26,22 +28,18 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - name: Pull Docker Image
-        id: pull_docker_image
-        uses: ./.github/actions/pull_docker_image
-        with:
-          image_name: ar-image:latest
-          github_token: ${{ secrets.hasiburr_qti }}
+      - name: Build docker Image
+        id: get-docker-image
+        uses: ./.github/actions/build_docker_image
 
       - name: Pull SDK sh file
         id: pull_sdk
         uses: ./.github/actions/aws-s3-exchanger
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          s3_bucket: qli-stg-kernel-gh-artifacts
+          s3_bucket: qli-prd-audior-gh-artifacts
           download_filename: ${{ env.SDK_NAME }}
           mode: download
+          location: Audioreach/meta-ar
 
       - name: Setup Directory Structure
         run: mkdir -p install/tmp
@@ -58,7 +56,7 @@ jobs:
         id: build
         uses: ./.github/actions/build
         with:
-          docker_image: ar-image:latest
+          docker_image: ${{ steps.get-docker-image.outputs.image_name }}
         env:
           BUILD_ARGS: ${{ inputs.build_args }}
 
