@@ -17,7 +17,7 @@ inputs:
   location:
     description: The location of the SDK
     required: true
-    default: 'test'
+    default: ''
   mode:
     description: Mode of operation (upload/download)
     required: true
@@ -31,13 +31,13 @@ runs:
       id: sync_data
       shell: bash
       env:
-        UPLOAD_LOCATION: ${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.workflow }}/${{ github.head_ref != '' && github.head_ref || github.run_id }}/
+        UPLOAD_LOCATION: ${{ github.repository_owner }}/${{ github.event.repository.name }}/${{ github.workflow }}/
       run: |
         case "${{ inputs.mode }}" in
           upload)
             echo "::group::$(printf '__________ %-100s' 'Process' | tr ' ' _)"
             echo "Uploading file to S3 bucket..."
-            aws s3 cp "${{ inputs.local_file }}" s3://${{ inputs.s3_bucket }}/${{ inputs.location }}/${{ env.UPLOAD_LOCATION }}
+            aws s3 cp "${{ inputs.local_file }}" s3://${{ inputs.s3_bucket }}/${{ inputs.location }}${{ env.UPLOAD_LOCATION }}
             echo "Uploaded ${{ inputs.local_file }} to s3://${{ inputs.s3_bucket }}/${{ inputs.location }}/${{ env.UPLOAD_LOCATION }}"
             echo "::endgroup::"
             echo "Creating Pre-signed URL for ${{ inputs.local_file }}..."

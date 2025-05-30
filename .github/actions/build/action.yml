@@ -71,10 +71,12 @@ runs:
           -v $PWD:$PWD \
           -w $PWD \
           -e "GITHUB_WORKSPACE=${{ github.workspace }}" \
-          -e "BUILD_ARGS=${{ env.build_args }}" \
+          -e "BUILD_ARGS=${{ env.BUILD_ARGS }}" \
+          -e "KERNEL_VERSION=${{ env.KERNEL_VERSION }}" \
           --privileged \
           ${{ inputs.docker_image }} \
           bash -c "
+            set +x
             source ./install/environment-setup-armv8-2a-poky-linux
         
             cd ./modules/pa-pal-plugins/
@@ -83,10 +85,10 @@ runs:
             # Run the configure script with the specified arguments
             ./configure ${BUILD_ARGS} --with-pa_version=17.0 --without-pa-support-card-status
             # make
-            make DESTDIR=${GITHUB_WORKSPACE}/build install
+            make DESTDIR=\${GITHUB_WORKSPACE}/build install
             "
 
-    - name: Create build.tar 
+    - name: Create build.tar
       id: create_build_tar
       shell: bash
       run: |

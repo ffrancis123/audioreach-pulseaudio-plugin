@@ -10,14 +10,15 @@ on:
         required: true
         type: string
 
+# Using qcs6490 flat_build
 env:
-  IMAGE_NAME: core-image-base-qcs6490-rb3gen2-core-kit.rootfs-20250514094843.qcomflash
+  IMAGE_NAME: core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash
 
 jobs:
   process_image:
     runs-on:
       group: GHA-Audioreach-SelfHosted-RG
-      labels: [ self-hosted, audior-prd-u2404-x64-large-od-ephem ]
+      labels: [ self-hosted, audior-prd-u2204-x64-large-od-ephem ]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -66,6 +67,7 @@ jobs:
 
           echo "Extracting the image"
           tar -xvf ${{ env.IMAGE_NAME }}.tar.gz
+          rm -rf ${{ env.IMAGE_NAME }}.tar.gz
           echo "Image extracted successfully"
 
           ls -l ${{ env.IMAGE_NAME }}/rootfs.img
@@ -82,7 +84,7 @@ jobs:
               set -xe
               cd ${IMAGE_NAME}
               mkdir -p /tmp/rootfs
-              mount rootfs.img /tmp/rootfs
+              sudo mount rootfs.img /tmp/rootfs
               echo "Image mounted successfully"
 
               # Copy the arg build files to the mounted image
@@ -93,7 +95,7 @@ jobs:
               echo "Build files copied successfully"
               sync
               # Unmount the image
-              umount /tmp/rootfs
+              sudo umount /tmp/rootfs
               echo "Image unmounted successfully"
             "
             ls -l ${{ env.IMAGE_NAME }}/rootfs.img
@@ -106,7 +108,7 @@ jobs:
           set -e
           echo $PWD
           echo "Creating tar image for qcomflash directory"
-          tar -cvf core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash.tar.gz ${{ env.IMAGE_NAME }}/
+          tar -cvf ${{ env.IMAGE_NAME }}.tar.gz ${{ env.IMAGE_NAME }}/
           echo "Tar image created successfully"
 
       - name: Upload tar image
@@ -114,6 +116,5 @@ jobs:
         uses: ./.github/actions/aws-s3-exchanger
         with:
           s3_bucket: qli-prd-audior-gh-artifacts
-          local_file: ${{ github.workspace }}/core-image-base-qcs6490-rb3gen2-core-kit.rootfs.qcomflash.tar.gz
-          location: Audioreach/args
+          local_file: ${{ github.workspace }}/${{ env.IMAGE_NAME }}.tar.gz
           mode: upload
