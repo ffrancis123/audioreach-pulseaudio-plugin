@@ -10,6 +10,12 @@ on:
       - main
     paths-ignore:
       - '.github/**'
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   load_parameters:
@@ -41,4 +47,8 @@ jobs:
   trigger_lava:
     needs: [ load_parameters, build, process_image ]
     uses: Audioreach/audioreach-workflows/.github/workflows/test.yml@master
+    secrets: inherit
+
+  qcom-preflight-checks:
+    uses: Audioreach/audioreach-workflows/.github/workflows/qcom-preflight-checks.yml@master
     secrets: inherit
