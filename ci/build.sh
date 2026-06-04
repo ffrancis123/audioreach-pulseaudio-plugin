@@ -1,9 +1,19 @@
 #!/bin/bash
-# SPDX-License-Identifier: BSD-3-Clause-Clear
+# SPDX-License-Identifier: BSD-3-Clause
 #
-# Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 set -ex
 echo "Running build script..."
+
+PREBUILD_SCRIPT_PATH="${PREBUILD_SCRIPT:-$(dirname "${BASH_SOURCE[0]}")/pre_build.sh}"
+source "$PREBUILD_SCRIPT_PATH"
+
+# load build args from file if environment variable is not set
+if [ -z "${BUILD_ARGS}" ]; then
+    BUILD_OPTIONS_FILE="${GITHUB_WORKSPACE}/ci/build_options.txt"
+    BUILD_ARGS="$(sed -E 's/#.*$//' "$BUILD_OPTIONS_FILE" | sed '/^[[:space:]]*$/d' | tr '\n' ' ')"
+fi
+
 # Build/Compile audioreach-pulseaudio-plugin
 source ${GITHUB_WORKSPACE}/install/environment-setup-armv8-2a-poky-linux
 
